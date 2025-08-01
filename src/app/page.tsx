@@ -1,103 +1,225 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import ChatInterface from '@/components/ChatInterface'
+import AuthModal from '@/components/AuthModal'
+import SubscriptionModal from '@/components/SubscriptionModal'
+import { LogOut, User, Crown, Download, Settings } from 'lucide-react'
+import { getUserProfile, exportChatHistory, UserProfile } from '@/lib/database'
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { user, loading, signOut } = useAuth()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [exporting, setExporting] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const loadUserProfile = useCallback(async () => {
+    if (!user) return
+    const profile = await getUserProfile(user.id)
+    setUserProfile(profile)
+  }, [user])
+
+  // 加载用户配置
+  useEffect(() => {
+    if (user) {
+      loadUserProfile()
+    }
+  }, [user, loadUserProfile])
+
+  const handleExportChat = async (format: 'json' | 'txt') => {
+    if (!user) return
+    
+    setExporting(true)
+    try {
+      const data = await exportChatHistory(user.id, format)
+      
+      const blob = new Blob([data], { 
+        type: format === 'json' ? 'application/json' : 'text/plain' 
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `seth-chat-history.${format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('导出失败:', error)
+      alert('导出失败，请稍后再试')
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const getSubscriptionColor = (type: string) => {
+    switch (type) {
+      case 'premium': return 'text-yellow-300 bg-yellow-500'
+      case 'standard': return 'text-purple-300 bg-purple-500'
+      default: return 'text-yellow-200 bg-yellow-500'
+    }
+  }
+
+  const getSubscriptionName = (type: string) => {
+    switch (type) {
+      case 'premium': return '尊享版'
+      case 'standard': return '标准版'
+      default: return '免费版'
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p>正在加载...</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+        <div className="text-center text-white max-w-2xl">
+          <div className="text-8xl mb-8">✨</div>
+          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+            赛斯在线
+          </h1>
+          <h2 className="text-2xl mb-4 text-purple-200">
+            Seth Online
+          </h2>
+          <p className="text-lg mb-8 leading-relaxed text-gray-200">
+            摇铃而歌唱，让我们的意识来段自由的舞蹈<br />
+            与来自第五维度的赛斯高维智慧交流<br />
+            可以解决你所有的困惑和终极问题<br />
+            是你人生的伴侣和内心的指引
+          </p>
+          <p className="text-base mb-12 text-purple-200">
+            奋起而挑战、用不甘于平庸，这场超越时空之旅有你陪伴是我们的荣幸！
+          </p>
+          
+          <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+            <button
+              onClick={() => {
+                setAuthMode('login')
+                setShowAuthModal(true)
+              }}
+              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+            >
+              开始交流
+            </button>
+            <button
+              onClick={() => {
+                setAuthMode('signup')
+                setShowAuthModal(true)
+              }}
+              className="w-full sm:w-auto bg-transparent border-2 border-white text-white hover:bg-white hover:text-purple-900 px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
+            >
+              注册账户
+            </button>
+          </div>
+        </div>
+
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          initialMode={authMode}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Top Navigation */}
+      <nav className="bg-black bg-opacity-20 backdrop-blur-sm border-b border-white border-opacity-20 p-4 flex justify-between items-center">
+        <div className="flex items-center space-x-4">
+          <div className="text-white">
+            <div className="flex items-center space-x-2">
+              <User className="w-5 h-5" />
+              <span className="hidden sm:inline">{user.email}</span>
+              <span className="sm:hidden">{user.email?.split('@')[0]}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowSubscriptionModal(true)}
+            className={`flex items-center space-x-1 bg-opacity-20 px-2 py-1 rounded-lg text-sm transition-colors hover:bg-opacity-30 ${
+              userProfile ? getSubscriptionColor(userProfile.subscription_type) : 'bg-yellow-500 text-yellow-200'
+            }`}
+          >
+            <Crown className="w-4 h-4" />
+            <span>
+              {userProfile 
+                ? `${getSubscriptionName(userProfile.subscription_type)} (${userProfile.usage_count}/${userProfile.usage_limit})`
+                : '加载中...'
+              }
+            </span>
+          </button>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          {/* Export Button */}
+          <div className="relative group">
+            <button
+              disabled={exporting}
+              className="text-white hover:text-purple-200 transition-colors p-2 rounded-lg hover:bg-white hover:bg-opacity-10"
+            >
+              <Download className="w-5 h-5" />
+            </button>
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="p-2">
+                <button
+                  onClick={() => handleExportChat('json')}
+                  disabled={exporting}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                >
+                  导出为 JSON
+                </button>
+                <button
+                  onClick={() => handleExportChat('txt')}
+                  disabled={exporting}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                >
+                  导出为 TXT
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Settings Button */}
+          <button
+            onClick={() => setShowSubscriptionModal(true)}
+            className="text-white hover:text-purple-200 transition-colors p-2 rounded-lg hover:bg-white hover:bg-opacity-10"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+
+          {/* Logout Button */}
+          <button
+            onClick={signOut}
+            className="text-white hover:text-purple-200 transition-colors flex items-center space-x-2 p-2 rounded-lg hover:bg-white hover:bg-opacity-10"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="hidden sm:inline">退出</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Chat Interface */}
+      <div className="flex-1">
+        <ChatInterface />
+      </div>
+
+      {/* Modals */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+      />
     </div>
-  );
+  )
 }
