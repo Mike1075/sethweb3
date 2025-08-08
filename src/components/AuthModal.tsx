@@ -34,19 +34,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         }
         const { error } = await signUp(email, password)
         if (error) {
-          setError('注册失败，请检查您的信息')
-        } else {
-          onClose()
+          setError(`注册失败：${error.message}`)
+          return
         }
+        // 若启用了邮件确认，Supabase 不会立即登录，给出提示
+        setError('注册成功，如需邮箱确认请前往邮箱完成验证，然后使用“立即登录”。')
       } else {
         const { error } = await signIn(email, password)
         if (error) {
-          setError('登录失败，请检查邮箱和密码')
-        } else {
-          onClose()
+          setError(`登录失败：${error.message}`)
+          return
         }
+        onClose()
       }
-    } catch {
+    } catch (e) {
       setError('发生未知错误')
     } finally {
       setLoading(false)

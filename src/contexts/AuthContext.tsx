@@ -1,17 +1,17 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session } from '@supabase/supabase-js'
+import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
-  signUp: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>
-  signIn: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>
+  signUp: (email: string, password: string) => Promise<{ data: unknown; error: AuthError | null }>
+  signIn: (email: string, password: string) => Promise<{ data: unknown; error: AuthError | null }>
   signOut: () => Promise<void>
-  signInWithGoogle: () => Promise<{ data: unknown; error: unknown }>
+  signInWithGoogle: () => Promise<{ data: unknown; error: AuthError | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -59,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
     })
+    if (error) console.error('signUp error:', error.message)
     return { data, error }
   }
 
@@ -67,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
     })
+    if (error) console.error('signIn error:', error.message)
     return { data, error }
   }
 
@@ -80,8 +82,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         // 回跳到站点根，在客户端用 exchangeCodeForSession 兜底处理
         redirectTo: `${window.location.origin}`,
+        queryParams: {
+          prompt: 'select_account',
+        },
       },
     })
+    if (error) console.error('signInWithGoogle error:', error.message)
     return { data, error }
   }
 
