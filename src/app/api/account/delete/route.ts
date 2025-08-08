@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 export async function POST(_request: NextRequest) {
   // 验证当前登录用户
@@ -18,10 +18,10 @@ export async function POST(_request: NextRequest) {
       get(name: string) {
         return cookieStore.get(name)?.value
       },
-      set(name: string, value: string, options: any) {
+      set(name: string, value: string, options: CookieOptions) {
         cookieStore.set({ name, value, ...options })
       },
-      remove(name: string, options: any) {
+      remove(name: string, options: CookieOptions) {
         cookieStore.set({ name, value: '', ...options, maxAge: 0 })
       },
     },

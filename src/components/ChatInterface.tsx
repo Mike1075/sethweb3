@@ -12,8 +12,6 @@ import {
   getMessages, 
   saveMessage,
   deleteConversation,
-  incrementUsageCount,
-  checkUsageLimit,
   updateConversation
 } from '@/lib/database'
 

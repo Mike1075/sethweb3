@@ -41,6 +41,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  // 兜底：处理 OAuth 回跳到站点根时 URL 上的 code 参数（无需 /auth/callback 路由）
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    const code = url.searchParams.get('code')
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(() => {
+        url.searchParams.delete('code')
+        url.searchParams.delete('next')
+        window.history.replaceState({}, '', url.toString())
+      })
+    }
+  }, [])
+
   const signUp = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -65,7 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        // 回跳到站点根，在客户端用 exchangeCodeForSession 兜底处理
+        redirectTo: `${window.location.origin}`,
       },
     })
     return { data, error }
