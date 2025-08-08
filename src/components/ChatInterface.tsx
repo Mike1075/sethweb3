@@ -12,8 +12,6 @@ import {
   getMessages, 
   saveMessage,
   deleteConversation,
-  incrementUsageCount,
-  checkUsageLimit,
   updateConversation
 } from '@/lib/database'
 
@@ -94,9 +92,9 @@ export default function ChatInterface() {
     e.preventDefault()
     if (!input.trim() || loading || !user) return
 
-    // 检查使用限制
-    const canUse = await checkUsageLimit(user.id)
-    if (!canUse) {
+    // 服务端校验并原子增加用量
+    const usageRes = await fetch('/api/usage/check-increment', { method: 'POST' })
+    if (!usageRes.ok) {
       alert('您的使用次数已达到限制，请升级订阅以继续使用。')
       return
     }
@@ -136,8 +134,7 @@ export default function ChatInterface() {
     setLoading(true)
 
     try {
-      // 增加使用次数
-      await incrementUsageCount(user.id)
+      // 计数已在服务器完成
 
       const stream = await sendMessageToDify(
         userMessage.content,
@@ -331,7 +328,7 @@ export default function ChatInterface() {
               {currentConversation?.title || '赛斯在线 - Seth Online'}
             </h1>
             <p className="text-purple-200 text-sm mt-1">
-              与来自第五维度的high维智慧交流
+              与来自第五维度的高维智慧交流
             </p>
           </div>
         </div>

@@ -31,13 +31,13 @@ cp .env.example .env.local
 
 2. 配置环境变量：
 ```env
-# Supabase 配置
-NEXT_PUBLIC_SUPABASE_URL=https://wgtvbghhwbogknjkttuo.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+# Supabase 配置（示例值，请在 Netlify 环境变量中配置真实值）
+NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
 
-# Dify API 配置
+# Dify API 配置（仅服务端使用）
 DIFY_API_URL=https://pro.aifunbox.com/v1/
-DIFY_API_KEY=app-tEivDPsjZY6phvYSqscy9Cqr
+DIFY_API_KEY=<your_dify_api_key>
 ```
 
 ## 数据库设置

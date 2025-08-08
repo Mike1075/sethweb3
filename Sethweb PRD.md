@@ -9,16 +9,16 @@
 ## 1、集成Dify API 的网页版聊天功能。支持富文本和流式输出。
 
 - 基础URL: `https://pro.aifunbox.com/v1/`
-- API密钥: `app-tEivDPsjZY6phvYSqscy9Cqr`
+- API密钥: `<在 Netlify 环境变量 DIFY_API_KEY 配置>`
 - 支持流式响应 (Server-Sent Events)
 
 ## 2、数据库使用supabase，注册登陆验证使用supabase auth，支持邮件注册、用户名密码注册、谷歌注册等主流注册。支持账户删除功能，删除后清除所有用户数据。
 
 #### supabase 数据库参数如下：
 
-NEXT_PUBLIC_SUPABASE_URL=https://wgtvbghhwbogknjkttuo.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
 
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndndHZiZ2hod2JvZ2tuamt0dHVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODU3ODksImV4cCI6MjA2ODE2MTc4OX0.Zz-h6sz1Pc-0vO9zbAsw7OI4pWeoBgZNvrDUWqLwooM
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
 
 ## 3、聊天记录保存到数据库。可以进行查看、删除和导出。
 
