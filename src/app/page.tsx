@@ -220,6 +220,25 @@ export default function Home() {
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
       />
+      {/* 删除账户入口（暂放此处，后续可移入设置页） */}
+      <div className="fixed bottom-4 right-4">
+        <button
+          onClick={async () => {
+            if (!confirm('确认删除账户？此操作不可恢复，将清除所有数据。')) return
+            const res = await fetch('/api/account/delete', { method: 'POST' })
+            if (res.ok) {
+              alert('账户已删除')
+              window.location.href = '/'
+            } else {
+              const t = await res.text()
+              alert('删除失败：' + t)
+            }
+          }}
+          className="text-xs opacity-60 hover:opacity-100 text-white underline"
+        >
+          删除账户
+        </button>
+      </div>
     </div>
   )
 }
