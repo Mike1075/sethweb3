@@ -334,7 +334,7 @@ export default function ChatInterface() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900">
           {messages.length === 0 && (
             <div className="text-center text-white opacity-70 mt-20">
               <div className="text-6xl mb-4">✨</div>
@@ -372,7 +372,7 @@ export default function ChatInterface() {
           
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-white bg-opacity-10 text-white backdrop-blur-sm p-3 rounded-lg flex items-center space-x-2">
+              <div className="bg-white bg-opacity-10 text-white backdrop-blur-sm p-3 rounded-lg flex items-center space-x-2 shadow">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>赛斯正在思考...</span>
               </div>
@@ -389,7 +389,7 @@ export default function ChatInterface() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="在这里输入你的问题..."
-              className="flex-1 bg-white bg-opacity-10 text-white placeholder-gray-300 border border-white border-opacity-20 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="flex-1 bg-white text-gray-900 placeholder-gray-500 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               disabled={loading}
             />
             <button
